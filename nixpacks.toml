@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ['python3', 'nodejs', 'chromium']
+nixPkgs = ['python3', 'nodejs', 'chromium', 'glib', 'nss', 'nspr', 'atk', 'cups', 'dbus', 'expat', 'fontconfig', 'freetype', 'gdk-pixbuf', 'gtk3', 'libX11', 'libXcomposite', 'libXcursor', 'libXdamage', 'libXext', 'libXfixes', 'libXrandr', 'libXrender', 'libXss', 'libxtst', 'alsa-lib', 'pango', 'at-spi2-core', 'mesa']
 
 [phases.build]
 cmds = ['pip install -r backend/requirements.txt']

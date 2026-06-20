@@ -53,6 +53,12 @@ class AIAnalyst:
             {"niche": "Medical/Wellness", "result": "Increased high-ticket appointment bookings by 50% for a Swiss anti-aging clinic via authoritative content positioning.", "ua": "Збільшили кількість записів на високочекові процедури на 50% для швейцарської клініки омолодження через позиціонування авторитетного контенту."},
             {"niche": "Art/Jewelry", "result": "Scaled private collection sales for a New York gallery by targeting UHNWI through niche digital galleries.", "ua": "Масштабували продажі приватних колекцій для нью-йоркської галереї, таргетуючи UHNWI через нішеві цифрові галереї."},
             {"niche": "Financial/Wealth", "result": "Generated $2M in new AUM for a boutique wealth management firm in Singapore using a status-driven LinkedIn strategy.", "ua": "Залучили $2 млн нових активів під управління для бутикової фірми з управління капіталом у Сінгапурі за допомогою стратегії статусу в LinkedIn."},
+            {"niche": "Interior Design/Architecture", "result": "Attracted 3 ultra-luxury residential projects in Beverly Hills by positioning the lead architect as a 'cultural curator'.", "ua": "Залучили 3 ультра-люксові житлові проєкти в Беверлі-Хіллз, позиціонуючи головного архітектора як 'культурного куратора'."},
+            {"niche": "Legal/Estate Planning", "result": "Acquired 4 high-net-worth corporate clients for a Zurich law firm by optimizing their digital authority on cross-border tax law.", "ua": "Залучили 4 корпоративних клієнтів з високим рівнем статків для цюрихської юридичної фірми, оптимізувавши їхній цифровий авторитет у сфері транскордонного податкового права."},
+            {"niche": "Fashion/Bespoke", "result": "Increased pre-order volume by 60% for a Savile Row tailor by creating a 'Members Only' digital experience.", "ua": "Збільшили обсяг попередніх замовлень на 60% для кравця з Savile Row, створивши цифровий досвід 'тільки для членів клубу'."},
+            {"niche": "Education/Consulting", "result": "Boosted acceptance rates to Ivy League schools by 25% for a premium consultancy through targeted authority building.", "ua": "Підвищили рівень зарахування до університетів Ліги Плюща на 25% для преміального консалтингу через цілеспрямоване побудовування авторитету."},
+            {"niche": "Rare Cars/Collections", "result": "Sold a rare 1960s Ferrari in 14 days by targeting a private circle of collectors via an exclusive dark-mode landing page.", "ua": "Продали рідкісну Ferrari 1960-х за 14 днів, таргетуючи приватне коло колекціонерів через ексклюзивну landing page у темному режимі."},
+            {"niche": "Security/Protection", "result": "Secured 2 long-term contracts with high-profile executives by showcasing a 'Zero-Failure' digital security audit.", "ua": "Забезпечили 2 довгострокові контракти з високопоставленими керівниками, продемонструвавши цифровий аудит безпеки за принципом 'Нуль помилок'."},
             {"niche": "General Luxury", "result": "Transformed a boutique luxury brand's digital presence, leading to a 40% increase in average order value.", "ua": "Трансформували цифрову присутність бутикового люкс-бренду, що призвело до збільшення середнього чека на 40%."}
         ]
 
@@ -184,7 +190,7 @@ class AIAnalyst:
                     offer_en = parts[1].strip()
                 except:
                     offer_ua = offer_text
-                    offer_en = offer_//text
+                    offer_en = offer_text
             else:
                 offer_ua = offer_text
                 offer_en = offer_text
