@@ -7,6 +7,9 @@ import {
   Globe, ExternalLink, User, Target, CheckCircle2, Trash2 
 } from 'lucide-react';
 
+// Визначаємо базовий URL API: або зі змінних середовища, або localhost для розробки
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
 interface Lead {
   id: string;
   company_name: string;
@@ -102,7 +105,7 @@ const Dashboard = () => {
 
   const fetchLogs = async () => {
     try {
-      const res = await fetch('http://localhost:8000/logs');
+      const res = await fetch(`${API_BASE_URL}/logs`);
       const data = await res.json();
       if (data.logs) setLogs(data.logs);
     } catch (e) { console.error('Logs error:', e); }
@@ -111,7 +114,7 @@ const Dashboard = () => {
   const handleSearch = async () => {
     setIsSearching(true);
     try {
-      const res = await fetch('http://localhost:8000/search', {
+      const res = await fetch(`${API_BASE_URL}/search`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(searchQuery),
@@ -126,7 +129,7 @@ const Dashboard = () => {
   const runAnalysis = async (leadId: string) => {
     setIsAnalyzing(true); setAnalysis(null); setOffer(null);
     try {
-      const res = await fetch(`http://localhost:8000/analyze/${leadId}`);
+      const res = await fetch(`${API_BASE_URL}/analyze/${leadId}`);
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setAnalysis(typeof data.analysis === 'object' ? data.analysis.analysis : data.analysis);
@@ -136,7 +139,7 @@ const Dashboard = () => {
   const generateOffer = async (leadId: string) => {
     setIsGenerating(true);
     try {
-      const res = await fetch(`http://localhost:8000/generate-offer/${leadId}`);
+      const res = await fetch(`${API_BASE_URL}/generate-offer/${leadId}`);
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setOffer({ ua: data.offer.ua, en: data.offer.en });
@@ -146,7 +149,7 @@ const Dashboard = () => {
   const sendOffer = async (leadId: string) => {
     setIsSending(true);
     try {
-      const res = await fetch(`http://localhost:8000/send/${leadId}`, { method: 'POST' });
+      const res = await fetch(`${API_BASE_URL}/send/${leadId}`, { method: 'POST' });
       const data = await res.json();
       if (data.status === 'error') throw new Error(data.message);
       alert('Offer sent successfully!');
@@ -156,7 +159,7 @@ const Dashboard = () => {
   const deleteLead = async (id: string) => {
     if (!confirm('Delete this lead?')) return;
     try {
-      await fetch(`http://localhost:8000/leads/${id}`, { method: 'DELETE' });
+      await fetch(`${API_BASE_URL}/leads/${id}`, { method: 'DELETE' });
       setLeads(leads.filter(l => l.id !== id));
       setSelectedLead(null);
       setAnalysis(null);
