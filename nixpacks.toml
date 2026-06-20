@@ -1,0 +1,5 @@
+[phases.setup]
+nixPkgs = ['python3', 'nodejs', 'chromium']
+
+[phases.build]
+cmds = ['pip install -r backend/requirements.txt']
