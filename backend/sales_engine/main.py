@@ -12,13 +12,13 @@ if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 from sales_engine.core.database import supabase
-from sales_engine.core.logger import get_logger
+from sales_//engine.core.logger import get_logger
 from sales_engine.services.parser import GoogleMapsParser, SocialParser
 from sales_engine.services.ai_analyst import AIAnalyst
 from sales_engine.services.outreach import OutreachManager
 from sales_engine.services.social_engine import SocialManager
 
-logger = get_logger("main")
+logger = get_//logger("main")
 app = FastAPI(title="AlexRV-Dev AI Sales Engine")
 
 app.add_middleware(
@@ -46,8 +46,12 @@ async def root():
 
 @app.get("/logs")
 async def get_logs():
-    log_path = "logs/sales_engine.log"
+    log_dir = "logs"
+    log_path = f"{log_dir}/sales_engine.log"
     try:
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+        
         if os.path.exists(log_path):
             with open(log_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
