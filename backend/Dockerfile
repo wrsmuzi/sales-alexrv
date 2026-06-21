@@ -19,6 +19,6 @@ COPY . .
 # Указываем порт
 EXPOSE 8000
 
-# САМЫЙ НАДЕЖНЫЙ СПОСОБ ЗАПУСКА:
-# Используем shell-форму, чтобы переменная ${PORT} была раскрыта Railway перед запуском uvicorn
-CMD ["sh", "-c", "uvicorn sales_engine.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# ЖЕСТКО ФИКСИРУЕМ ПОРТ 8000
+# Больше никакой магии с ${PORT}, чтобы не было путаницы с Railway
+CMD ["uvicorn", "sales_engine.main:app", "--host", "0.0.0.0", "--port", "8000"]
