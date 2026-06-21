@@ -19,10 +19,9 @@ except Exception as e:
     supabase = None
 
 from sales_engine.core.logger import get_logger
-from sales_engine.services.parser import GoogleMapsParser, SocialParser
+from sales_engine.services.parser import GoogleMapsParser
 from sales_engine.services.ai_analyst import AIAnalyst
 from sales_engine.services.outreach import OutreachManager
-from sales_engine.services.social_engine import SocialManager
 
 logger = get_logger("main")
 app = FastAPI(title="AlexRV-Dev AI Sales Engine")
@@ -52,11 +51,6 @@ class SearchQuery(BaseModel):
     keyword: str
     region: str
 
-class SocialSearchQuery(BaseModel):
-    keyword: str
-    region: str
-    platform: str
-
 @app.get("/")
 async def root():
     return {"status": "online", "message": "Backend is running"}
@@ -82,15 +76,6 @@ async def start_search(query: SearchQuery):
     loop = asyncio.get_event_loop()
     try:
         leads = await loop.run_in_executor(executor, lambda: GoogleMapsParser().search_leads(query.keyword, query.region))
-        return {"status": "success", "leads_found": len(leads), "data": leads}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/search-social")
-async def start_social_search(query: SocialSearchQuery):
-    loop = asyncio.get_event_loop()
-    try:
-        leads = await loop.run_in_executor(executor, lambda: SocialParser().search_social_profiles(query.keyword, query.region, query.platform))
         return {"status": "success", "leads_found": len(leads), "data": leads}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -128,30 +113,6 @@ async def send_offer(lead_id: str):
         result = await manager.send_offer(offer_id)
         if result.get("status") == "error": raise HTTPException(status_code=400, detail=result['message'])
         return {"status": "success", "result": result}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/send-social/{lead_id}")
-async def send_social_offer(lead_id: str):
-    loop = asyncio.get_event_loop()
-    try:
-        if not supabase: raise HTTPException(status_code=503, detail="Database not connected")
-        offer_res = supabase.table('offers').select('*').eq('lead_id', lead_id).order('created_at', { 'ascending': False }).limit(1).execute()
-        if not offer_res.data:
-            raise HTTPException(status_code=404, detail="Оффер не знайдено")
-        
-        offer_data = offer_res.data[0]
-        lead_res = supabase.table('leads').select('*').eq('id', lead_id).single().execute()
-        lead_data = lead_res.data
-        
-        try:
-            offer_json = json.loads(offer_data['offer_text'])
-            message = offer_json.get('en') or offer_json.get('ua') or offer_data['offer_text']
-        except:
-            message = offer_data['offer_text']
-        
-        result = await loop.run_in_executor(executor, lambda: SocialManager().send_social_message(lead_data['profile_url'], message))
-        return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
