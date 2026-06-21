@@ -2,8 +2,9 @@ import os
 import traceback
 from dotenv import load_dotenv
 from supabase import create_client, Client
-from sales_engine.core.logger import get_logger
 import httpx
+
+# Monkeypatch httpx.Client to handle 'proxy' argument errors
 original_httpx_client_init = httpx.Client.__init__
 def patched_httpx_client_init(self, *args, **kwargs):
     try:
@@ -16,33 +17,13 @@ def patched_httpx_client_init(self, *args, **kwargs):
             raise e
 httpx.Client.__init__ = patched_httpx_client_init
 
-logger = get_logger("database")
-
 load_dotenv()
 
-# Set Playwright environment variables to bypass host requirement checks
-os.environ['PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS'] = 'true'
-
 class SupabaseManager:
-
     def __init__(self):
-        logger.info("--- DEBUG: Starting Supabase Diagnostics ---")
+        print("\n--- [DATABASE] STARTING INIT ---")
         
-        # 1. Log library versions
-        try:
-            import supabase
-            logger.info(f"DEBUG: supabase version: {supabase.__version__}")
-            logger.info(f"DEBUG: httpx version: {httpx.__version__}")
-        except Exception as e:
-            logger.error(f"DEBUG: Could not get versions: {e}")
-
-        # 2. Check environment variables
-        proxy_vars = ['HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy', 'NO_PROXY']
-        for var in proxy_vars:
-            val = os.environ.get(var)
-            logger.info(f"DEBUG: ENV {var} = {val}")
-
-        # Forcefully disable all proxy settings to prevent the 'proxy' keyword argument error
+        # Force disable proxies
         os.environ['HTTP_PROXY'] = ''
         os.environ['HTTPS_PROXY'] = ''
         os.environ['http_proxy'] = ''
@@ -53,19 +34,18 @@ class SupabaseManager:
         self.key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
         
         if not self.url or not self.key:
-            logger.error("SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is missing in .env")
-            raise Exception("Supabase credentials missing in .env")
+            print("❌ [DATABASE] ERROR: SUPABASE_URL or KEY is missing!")
+            self.client = None
+            return
             
         try:
-            logger.info("Attempting to create Supabase client...")
-            # We use create_client from supabase. 
-            # If the proxy error persists, it's happening inside the supabase/gotrue library
+            print(f"Attempting to connect to: {self.url[:15]}...")
             self.client: Client = create_client(self.url, self.key)
-            logger.info("✅ Successfully connected to Supabase.")
+            print("✅ [DATABASE] SUCCESSFULLY CONNECTED")
         except Exception as e:
-            logger.error("❌ CRITICAL ERROR DURING SUPABASE INIT:")
-            logger.error(traceback.format_exc())
-            raise e
+            print(f"❌ [DATABASE] CRITICAL ERROR: {e}")
+            print(traceback.format_exc())
+            self.client = None
 
     def get_client(self) -> Client:
         return self.client
@@ -74,5 +54,5 @@ try:
     supabase_manager = SupabaseManager()
     supabase = supabase_manager.get_client()
 except Exception as e:
-    logger.critical(f"Critical failure initializing database: {e}")
+    print(f"❌ [DATABASE] FATAL FAILURE: {e}")
     supabase = None
