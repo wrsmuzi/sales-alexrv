@@ -11,19 +11,23 @@ from typing import List, Optional
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
-from sales_engine.core.database import supabase
+# Импортируем базу с защитой
+try:
+    from sales_engine.core.database import supabase
+except Exception as e:
+    print(f"CRITICAL: Failed to import supabase: {e}")
+    supabase = None
+
 from sales_engine.core.logger import get_logger
 from sales_engine.services.parser import GoogleMapsParser, SocialParser
 from sales_engine.services.ai_analyst import AIAnalyst
 from sales_engine.services.outreach import OutreachManager
-from sales_engine.services.social_engine import SocialManager # Тут була помилка, виправляю
-
-# ПРАВИЛЬНИЙ ІМПОРТ (БЕЗ //)
 from sales_engine.services.social_engine import SocialManager
 
 logger = get_logger("main")
 app = FastAPI(title="AlexRV-Dev AI Sales Engine")
 
+# Максимально открытый CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -33,6 +37,16 @@ app.add_middleware(
 )
 
 executor = ThreadPoolExecutor(max_workers=3)
+
+# --- NEW: Health Check Endpoint ---
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "ok", 
+        "database": "connected" if supabase else "disconnected",
+        "port": os.environ.get("PORT", "8000")
+    }
+# ---------------------------------
 
 class SearchQuery(BaseModel):
     keyword: str
@@ -45,7 +59,7 @@ class SocialSearchQuery(BaseModel):
 
 @app.get("/")
 async def root():
-    return {"status": "online"}
+    return {"status": "online", "message": "Backend is running"}
 
 @app.get("/logs")
 async def get_logs():
@@ -54,6 +68,7 @@ async def get_logs():
     try:
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
+        
         if os.path.exists(log_path):
             with open(log_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
@@ -103,6 +118,7 @@ async def generate_offer(lead_id: str):
 @app.post("/send/{lead_id}")
 async def send_offer(lead_id: str):
     try:
+        if not supabase: raise HTTPException(status_code=503, detail="Database not connected")
         offer_res = supabase.table('offers').select('*').eq('lead_id', lead_id).order('created_at', { 'ascending': False }).limit(1).execute()
         if not offer_res.data:
             raise HTTPException(status_code=404, detail="Оффер не знайдено")
@@ -119,6 +135,7 @@ async def send_offer(lead_id: str):
 async def send_social_offer(lead_id: str):
     loop = asyncio.get_event_loop()
     try:
+        if not supabase: raise HTTPException(status_code=503, detail="Database not connected")
         offer_res = supabase.table('offers').select('*').eq('lead_id', lead_id).order('created_at', { 'ascending': False }).limit(1).execute()
         if not offer_res.data:
             raise HTTPException(status_code=404, detail="Оффер не знайдено")
@@ -141,6 +158,7 @@ async def send_social_offer(lead_id: str):
 @app.delete("/leads/{lead_id}")
 async def delete_lead(lead_id: str):
     try:
+        if not supabase: raise HTTPException(status_code=503, detail="Database not connected")
         supabase.table('leads').delete().eq('id', lead_id).execute()
         return {"status": "success"}
     except Exception as e:
@@ -149,6 +167,7 @@ async def delete_lead(lead_id: str):
 @app.post("/clear-leads")
 async def clear_leads():
     try:
+        if not supabase: raise HTTPException(status_code=503, detail="Database not connected")
         supabase.table('offers').delete().neq('id', '00000000-0000-0000-0000-000000000000').execute()
         supabase.table('analysis').delete().neq('id', '00000000-0000-0000-0000-000000000000').execute()
         supabase.table('leads').delete().neq('id', '00000000-0000-0000-0000-000000000000').execute()
