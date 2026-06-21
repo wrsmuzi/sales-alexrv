@@ -16,8 +16,8 @@ RUN playwright install chromium
 # Копируем весь код приложения
 COPY . .
 
-# Указываем порт (информативно)
-EXPOSE 8080
+# Указываем порт (для документации, Railway всё равно переопределит его через ${PORT})
+EXPOSE 8000
 
-# Запуск сервера через shell, чтобы переменная ${PORT} раскрылась
-CMD uvicorn sales_engine.main:app --host 0.0.0.0 --port ${PORT:-8080}
+# Запуск сервера: слушаем ПОРТ, который назначил Railway, или 8000 по умолчанию
+CMD uvicorn sales_engine.main:app --host 0.0.0.0 --port ${PORT:-8000}
