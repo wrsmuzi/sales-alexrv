@@ -57,9 +57,9 @@ class GoogleMapsParser:
         logger.info(f"🚀 Turbo Sync search started for {keyword} in {region}...")
         try:
             with sync_playwright() as p:
-                # Головне вікно залишаємо видимим, щоб ти бачив прогрес і міг розгадати капчу
+                # Головне вікно тепер ТАКОЖ headless, щоб працювало на Railway
                 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-                browser = p.chromium.launch(headless=False) 
+                browser = p.chromium.launch(headless=True) 
                 context = browser.new_context(user_agent=user_agent)
                 page = context.new_page()
                 
@@ -177,8 +177,8 @@ class SocialParser:
         
         try:
             with sync_playwright() as p:
-                logger.info(f"🌐 Opening browser (VISIBLE MODE). If you see a CAPTCHA, please solve it!")
-                browser = p.chromium.launch(headless=False) 
+                logger.info(f"🌐 Opening browser (HEADLESS MODE) for stability on server.")
+                browser = p.chromium.launch(headless=True) 
                 context = browser.new_context(
                     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
                 )
