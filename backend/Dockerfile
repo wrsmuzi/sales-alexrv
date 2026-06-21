@@ -1,26 +1,21 @@
-# Используем официальный легкий образ Python
-FROM python:3.12-slim
+# Используем ОФИЦИАЛЬНЫЙ образ от Microsoft Playwright
+# Он уже содержит: Python, все системные зависимости для браузеров и правильные шрифты.
+# Версия v1.42.0 соответствует вашей версии в requirements.txt
+FROM mcr.microsoft.com/playwright/python:v1.42.0-jammy
 
 # Создаем рабочую директорию
 WORKDIR /app
 
-# Устанавливаем базовые инструменты, которые могут понадобиться для установки зависимостей
-RUN apt-get update && apt-get install -y \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
 # Копируем файл зависимостей
 COPY requirements.txt .
 
-# Устанавливаем Python зависимости БЕЗ КЕША
+# Устанавливаем Python зависимости
+# Используем httpx==0.25.2 для совместимости с supabase 2.4.0
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 1. Устанавливаем сам браузер Chromium
+# Устанавливаем только сам бинарный файл браузера Chromium
+# Все системные зависимости (либы, шрифты) уже встроены в этот образ
 RUN playwright install chromium
-
-# 2. ОФИЦИАЛЬНЫЙ МЕТОД: Устанавливаем все системные зависимости для этого браузера
-# Эта команда сама найдет и поставит все те самые libx11, libgbm и прочие .so файлы
-RUN playwright install-deps chromium
 
 # Копируем весь код приложения
 COPY . .
