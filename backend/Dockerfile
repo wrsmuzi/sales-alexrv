@@ -1,31 +1,32 @@
-
+# Используем официальный легкий образ Python
 FROM python:3.12-slim
-RUN apt-get update && apt-get install -y \
-    libglib2.0-0 \
-    libnss3 \
-    libnspr4 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libdbus-1-3 \
-    libexpat1 \
-    libX11-6 \
-    libXcomposite1 \
-    libXdamage1 \
-    libXext6 \
-    libXfixes3 \
-    libXrandr2 \
-    libgbm1 \
-    libxkbcommon0 \
-    libpango-1.0-0 \
-    libcairo2 \
-    libasound2 \
-    && rm -rf /var/lib/apt/lists/*
+
+# Создаем рабочую директорию
 WORKDIR /app
+
+# Устанавливаем базовые инструменты, которые могут понадобиться для установки зависимостей
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Копируем файл зависимостей
 COPY requirements.txt .
+
+# Устанавливаем Python зависимости БЕЗ КЕША
 RUN pip install --no-cache-dir -r requirements.txt
-RUN playwright install chromium --with-deps
+
+# 1. Устанавливаем сам браузер Chromium
+RUN playwright install chromium
+
+# 2. ОФИЦИАЛЬНЫЙ МЕТОД: Устанавливаем все системные зависимости для этого браузера
+# Эта команда сама найдет и поставит все те самые libx11, libgbm и прочие .so файлы
+RUN playwright install-deps chromium
+
+# Копируем весь код приложения
 COPY . .
+
+# Указываем порт
 EXPOSE 8080
+
+# Запуск сервера
 CMD ["uvicorn", "sales_engine.main:app", "--host", "0.0.0.0", "--port", "8080"]
